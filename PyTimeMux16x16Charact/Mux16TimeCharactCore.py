@@ -8,17 +8,38 @@ Created on Tue Oct 09 11:19:55 2018
 import sys
 import ctypes
 import PyGFET.DataStructures as PyData
-from PyGFET.RecordCore import NeoRecord
 import PyDAQmx as Daq
 from ctypes import byref, c_int32
 import numpy as np
 from scipy import signal
-import neo
-import quantities as pq
 
 ###############################################################################
 ######
 ###############################################################################
+
+
+def GetDevName():
+    print('ReadAnalog GetDevName')
+    # Get Device Name of Daq Card
+    n = 1024
+    buff = ctypes.create_string_buffer(n)
+    Daq.DAQmxGetSysDevNames(buff, n)
+    if sys.version_info >= (3,):
+        value = buff.value.decode()
+    else:
+        value = buff.value
+
+    Dev = None
+    value = value.replace(' ', '')
+    for dev in value.split(','):
+        if dev.startswith('Sim'):
+            continue
+        Dev = dev + '/{}'
+
+    if Dev is None:
+        print 'ERRROORR dev not found ', value
+
+    return Dev
 
 
 class ReadAnalog(Daq.Task):
@@ -41,7 +62,7 @@ class ReadAnalog(Daq.Task):
         Daq.Task.__init__(self)
         self.Channels = InChans
 
-        Dev = self.GetDevName()
+        Dev = GetDevName()
         for Ch in self.Channels:
             self.CreateAIVoltageChan(Dev.format(Ch), "",
                                      Daq.DAQmx_Val_RSE,
@@ -49,21 +70,6 @@ class ReadAnalog(Daq.Task):
                                      Daq.DAQmx_Val_Volts, None)
 
         self.AutoRegisterDoneEvent(0)
-
-    def GetDevName(self,):
-        print 'ReadAnalog GetDevName'
-        # Get Device Name of Daq Card
-        n = 1024
-        buff = ctypes.create_string_buffer(n)
-        Daq.DAQmxGetSysDevNames(buff, n)
-        if sys.version_info >= (3,):
-            value = buff.value.decode()
-        else:
-            value = buff.value
-        value.split(',')[0]
-        Dev = value + '/{}'
-
-        return Dev
 
     def ReadData(self, Fs=1000, nSamps=10000, EverySamps=1000):
 
@@ -107,8 +113,6 @@ class ReadAnalog(Daq.Task):
         if not self.ContSamps:  # TODO check why stack here
             self.data = np.vstack((self.data, data))
 
-#        print data.size, self.data.shape
-
         if self.EveryNEvent:
             self.EveryNEvent(data)
 
@@ -134,26 +138,12 @@ class WriteAnalog(Daq.Task):
     def __init__(self, Channels):
 
         Daq.Task.__init__(self)
-        Dev = self.GetDevName()
+        Dev = GetDevName()
         for Ch in Channels:
             self.CreateAOVoltageChan(Dev.format(Ch), "",
                                      -5.0, 5.0, Daq.DAQmx_Val_Volts, None)
         self.DisableStartTrig()
         self.StopTask()
-
-    def GetDevName(self,):
-        # Get Device Name of Daq Card
-        n = 1024
-        buff = ctypes.create_string_buffer(n)
-        Daq.DAQmxGetSysDevNames(buff, n)
-        if sys.version_info >= (3,):
-            value = buff.value.decode()
-        else:
-            value = buff.value
-        value.split(',')[0]
-        Dev = value + '/{}'
-
-        return Dev
 
     def SetVal(self, value):
 
@@ -195,9 +185,8 @@ class WriteDigital(Daq.Task):
     Class to write data to Daq card
     '''
     def __init__(self, Channels):
-        print 'Init Digital Channels'
         Daq.Task.__init__(self)
-        Dev = self.GetDevName()
+        Dev = GetDevName()
         for Ch in Channels:
             self.CreateDOChan(Dev.format(Ch), "",
                               Daq.DAQmx_Val_ChanForAllLines)
@@ -205,35 +194,10 @@ class WriteDigital(Daq.Task):
         self.DisableStartTrig()
         self.StopTask()
 
-    def GetDevName(self,):
-        # Get Device Name of Daq Card
-        n = 1024
-        buff = ctypes.create_string_buffer(n)
-        Daq.DAQmxGetSysDevNames(buff, n)
-        if sys.version_info >= (3,):
-            value = buff.value.decode()
-        else:
-            value = buff.value
-        value.split(',')[0]
-        Dev = value + '/{}'
-
-        return Dev
-
     def SetDigitalSignal(self, Signal):
-        print 'SetDigSignal', Signal, Signal.shape
         Sig = np.array(Signal, dtype=np.uint8)
         self.WriteDigitalLines(1, 1, 10.0, Daq.DAQmx_Val_GroupByChannel,
                                Sig, None, None)
-#
-#        read = c_int32()
-#        self.CfgSampClkTiming('ai/SampleClock', 1, Daq.DAQmx_Val_Rising,
-#                              Daq.DAQmx_Val_ContSamps, Signal.shape)
-#        self.CfgDigEdgeStartTrig('ai/StartTrigger', Daq.DAQmx_Val_Rising)
-#        self.WriteDigitalLines(Signal.shape, False, 1,
-#                               Daq.DAQmx_Val_GroupByChannel,
-#                               Signal, byref(read), None)
-#        self.StartTask()
-#        print 'End SetSingal', read
 
 
 ###############################################################################
@@ -331,17 +295,20 @@ class ChannelsConfig():
         print 'Channels configurtation'
         print 'Gate', self.GateChannelIndex
         print 'Channels ', len(self.ChNamesList)
-        print 'ai list ->', InChans
         for ch in sorted(Channels):
             if Configuration == 'DC':
-                print ch, ' DC -> ', self.aiChannels[ch][0], self.DCChannelIndex[ch]
+                print(ch, ' DC -> ',
+                      self.aiChannels[ch][0], self.DCChannelIndex[ch])
                 self.ACChannelIndex = self.DCChannelIndex
             elif Configuration == 'AC':
-                print ch, ' AC -> ', self.aiChannels[ch][1], self.ACChannelIndex[ch]
+                print(ch, ' AC -> ',
+                      self.aiChannels[ch][1], self.ACChannelIndex[ch])
                 self.DCChannelIndex = self.ACChannelIndex
             else:
-                print ch, ' DC -> ', self.aiChannels[ch][0], self.DCChannelIndex[ch]
-                print ch, ' AC -> ', self.aiChannels[ch][1], self.ACChannelIndex[ch]
+                print(ch, ' DC -> ',
+                      self.aiChannels[ch][0], self.DCChannelIndex[ch])
+                print(ch, ' AC -> ',
+                      self.aiChannels[ch][1], self.ACChannelIndex[ch])
 
         self.Inputs = ReadAnalog(InChans=InChans)
         # events linking
@@ -349,18 +316,15 @@ class ChannelsConfig():
         self.Inputs.DoneEvent = self.DoneEventCallBack
 
     def InitDigitalChannels(self, DigColumns=None):
-        print 'InitDigitalChannels'
+        self.ClearSig = np.zeros((1, len(DigColumns)),
+                                 dtype=np.bool).astype(np.uint8)
         DOChannels = []
         self.DigColumns = sorted(DigColumns)
-        print self.DigColumns, DigColumns
 
         for digc in sorted(self.DigColumns):
-            print digc
-            DOChannels.append(self.doColumns[digc])
+            DOChannels.append(self.doColumns[digc][0])
 #            DOChannels.append(self.doColumns[digc][1])
 
-        print DigColumns
-        print DOChannels
         self.ColumnsControl = WriteDigital(Channels=DOChannels)
 
         ChannelNames = []
@@ -368,7 +332,6 @@ class ChannelsConfig():
             for nCol in range(len(DigColumns)):
                 ChannelNames.append(self.ChNamesList[nRow]+DigColumns[nCol])
         self.ChannelNames = sorted(ChannelNames)
-        print self.ChannelNames
 
     def __init__(self, Channels, GateChannel=None, Configuration='Both',
                  ChVg='ao2', ChVs='ao1', ChVds='ao0', ChVsig='ao3'):
@@ -387,10 +350,6 @@ class ChannelsConfig():
         self.VdsOut = WriteAnalog((ChVds,))
         self.VgOut = WriteAnalog((ChVg,))
 
-        # Output Digital Channels
-#        self.Multiplexing = WriteDigital(Channels=self.DOChannels)
-#        self.SetDigitalSignal(Signal=self.DOSignal)
-
     def SetBias(self, Vds, Vgs):
         print 'ChannelsConfig SetBias Vgs ->', Vgs, 'Vds ->', Vds
         self.VdsOut.SetVal(Vds)
@@ -407,8 +366,6 @@ class ChannelsConfig():
                              nSamps=nSamps)
 
     def GenerateDigitalSignal(self):
-        print 'GenerateDigitalSignal'
-        print self.DigColumns
         DOut = np.array([], dtype=np.bool)
 
         for nCol in range(len(self.DigColumns)):
@@ -419,23 +376,8 @@ class ChannelsConfig():
             DOut = np.vstack((DOut, Cout)) if DOut.size else Cout
 
         DOut.astype(np.uint8)
-        print DOut.astype(np.uint8)
-
-
-#        SortDInds = []
-#        for line in DOut[0:-1:2, :]:
-#            SortDInds.append(np.where(line))
-#
-#        self.SortDInds = SortDInds
 
         return DOut.astype(np.uint8)
-
-
-#    def SetDigitalSignal(self, Signal):
-#        print Signal
-#        if not self.Multiplexing:
-#            self.Multiplexing = WriteDigital(Channels=self.DOChannels)
-#        self.Multiplexing.SetSignal(Signal)
 
     def _SortChannels(self, data, SortDict):
         (samps, inch) = data.shape
@@ -654,7 +596,6 @@ class FFTBodeAnalysis():
     BodeSignal = None
     RemoveDC = None
 
-#    AdqDelay = 0
     AdqDelay = -5.8e-7
 
     def SetBodeConfig(self, FreqMin=0.1, FreqMax=15000, nFreqs=10, Arms=10e-3,
@@ -827,7 +768,8 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
         if self.EventSetBodeLabel:
             self.EventSetBodeLabel(Vpp=self.BodeSignal.Vpp)
 
-        print 'Acquire Bode data for ', self.BodeSignal.BodeDuration[self.iConf], ' Seconds'
+        print('Acquire Bode data for ',
+              self.BodeSignal.BodeDuration[self.iConf], ' Seconds')
 
         self.ReadChannelsData(Fs=FFTconf.Fs,
                               nSamps=FFTconf.nFFT*self.BodeSignal.nAvg,
@@ -983,7 +925,6 @@ class Charact(DataProcess):
     EventFFTDone = None
 
     def InitSweep(self, VdsVals, VgsVals, PSD=False, Bode=False):
-        print 'InitSweep'
         self.SwVgsVals = VgsVals
         self.SwVdsVals = VdsVals
         self.Bode = Bode
@@ -1012,7 +953,6 @@ class Charact(DataProcess):
         self.ApplyBiasPoint()
 
     def InitDictionaries(self):
-        print 'InitDictionaries'
         # DC dictionaries
         if self.GateChannelIndex is None:
             Gate = False
@@ -1069,7 +1009,6 @@ class Charact(DataProcess):
             self.StopCharac()
 
     def ApplyBiasPoint(self):
-        print 'ApplyBiasPoint'
         self.GetBiasCurrent(Vds=self.SwVdsVals[self.SwVdsInd],
                             Vgs=self.SwVgsVals[self.SwVgsInd])
 
@@ -1078,7 +1017,7 @@ class Charact(DataProcess):
                                self.SwVgsVals[self.SwVgsInd])
 
     def ApplyNextDigital(self):
-        print 'ApplyNextDigital', self.SwDigInd
+        print 'ApplyNextDigital'
         self.ColumnsControl.SetDigitalSignal(Signal=self.DO[:, self.SwDigInd])
 
     def BiasAttemptCallBack(self, Ids, time, Dev):
@@ -1092,22 +1031,15 @@ class Charact(DataProcess):
             self.EventCharAcDataAcq(Ids, time)
         else:
             self.StopCharac()
-#        return self.CharactRunning
 
     def BiasDoneCallBack(self, Ids):
         print 'BiasDoneCallback', Ids.shape, self.DigColumns[self.SwDigInd]
         j = 0
         for chi, chn in enumerate(self.ChannelNames):
-            print chn, chi
             if chn.endswith(self.DigColumns[self.SwDigInd]):
-                print chn, j
                 self.DevDCVals[chn]['Ids'][self.SwVgsInd,
                                            self.SwVdsInd] = Ids[j]
                 j += 1
-#        
-#        for chn, inds in self.DCChannelIndex.iteritems():
-#            self.DevDCVals[chn]['Ids'][self.SwVgsInd,
-#                                       self.SwVdsInd] = Ids[inds[1]]
 
         if self.EventCharBiasDone:
             self.EventCharBiasDone(self.DevDCVals)
@@ -1128,16 +1060,10 @@ class Charact(DataProcess):
         j = 0
         for chi, chn in enumerate(self.ChannelNames):
             if chn.endswith(self.DigColumns[self.SwDigInd]):
-                
                 self.DevACVals[chn]['gm']['Vd{}'.format(self.SwVdsInd)][
                         self.SwVgsInd] = Gm[:, j]
                 self.DevACVals[chn]['Fgm'] = SigFreqs
                 j += 1
-
-#        for chn, inds in self.ACChannelIndex.iteritems():
-#            self.DevACVals[chn]['gm']['Vd{}'.format(self.SwVdsInd)][
-#                    self.SwVgsInd] = Gm[:, inds[1]]
-#            self.DevACVals[chn]['Fgm'] = SigFreqs
 
         if self.EventCharACDone:
             self.EventCharACDone(self.DevACVals)
@@ -1152,11 +1078,6 @@ class Charact(DataProcess):
                         self.SwVgsInd] = psd[:, j]
                 self.DevACVals[chn]['Fpsd'] = ff
                 j += 1
-
-#        for chn, inds in self.ACChannelIndex.iteritems():
-#            self.DevACVals[chn]['PSD']['Vd{}'.format(self.SwVdsInd)][
-#                    self.SwVgsInd] = psd[:, inds[1]]
-#            self.DevACVals[chn]['Fpsd'] = ff
 
         if self.EventCharACDone:
             self.EventCharACDone(self.DevACVals)
@@ -1175,5 +1096,6 @@ class Charact(DataProcess):
 
     def StopCharac(self):
         print 'STOP'
+        self.ColumnsControl.SetDigitalSignal(Signal=self.ClearSig)
         self.CharactRunning = False
 #        self.Inputs.ClearTask()
