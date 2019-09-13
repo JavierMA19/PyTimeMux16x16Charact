@@ -100,13 +100,7 @@ class CharacLivePlot():
             self.PlotSwAC.Fig.canvas.draw()
 
     def PlotFFT(self, FFT):
-#        self.FFTFig, self.FFTAxs = plt.subplots()
-#        self.FFTAxs.ticklabel_format(axis='y', style='sci',
-#                                     scilimits=(-2, 2))
-#        plt.show()
-
         self.FFTAxs.plot(np.abs(FFT))
-#        self.FFTAxs.semilogx(FFT, OutFFT)
         self.FFTFig.canvas.draw()
 
     def __del__(self):
@@ -115,10 +109,6 @@ class CharacLivePlot():
 ###############################################################################
 ####
 ###############################################################################
-
-
-#GuiTestDC_ui = "GuiTestDC_v3.ui"  # Enter file here.
-#Ui_GuiTestDC, QtBaseClass = uic.loadUiType(GuiTestDC_ui)
 
 
 class CharactAPP(QtWidgets.QMainWindow):
@@ -160,7 +150,7 @@ class CharactAPP(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
         uipath = os.path.join(os.path.dirname(__file__),
                               'Mux16TimeCharactGui.ui')
-        print uipath
+        print(uipath)
         uic.loadUi(uipath, self)
         self.setWindowTitle('Time Multiplexing')
 
@@ -295,12 +285,12 @@ class CharactAPP(QtWidgets.QMainWindow):
 
     def ButSweepClick(self):
         if self.Charac is None:
-            print 'Init Channels first'
+            print('Init Channels first')
             return
 
         # Event Start button
         if self.Charac.CharactRunning:
-            print 'Stop'
+            print('Stop')
             self.Charac.StopCharac()
         else:
             self.SetEnableObjects(val=False,
@@ -340,7 +330,7 @@ class CharactAPP(QtWidgets.QMainWindow):
             if self.Charac.CharactRunning:
                 self.ButSweep.setText('Stop')
             else:
-                print 'ERROR'
+                print('ERROR')
 
     def SweepVariables(self):
         if self.ChckSP.isChecked():
@@ -381,7 +371,7 @@ class CharactAPP(QtWidgets.QMainWindow):
                         self.Charac.BodeSignal.Vpp[0]))
 
     def SetBodeConfig(self):
-        print 'Gui SetBodeConfig'
+        print('Gui SetBodeConfig')
         if self.SpnFreqMin.value() and self.SpnFreqMax.value() > 0:
             self.Charac.SetBodeConfig(FreqMin=self.SpnFreqMin.value(),
                                       FreqMax=self.SpnFreqMax.value(),
@@ -438,7 +428,7 @@ class CharactAPP(QtWidgets.QMainWindow):
 ###############################################################################
 
     def CharSweepDoneCallBack(self, Dcdict, Acdict):
-        print 'Gui sweep done save data'
+        print('Gui sweep done save data')
         if self.ChckSaveData.isChecked():
             Filename = self.FileName + "{}-Cy{}.h5".format('', self.Cycle)
             self.LblPath.setText(Filename)
@@ -472,7 +462,7 @@ class CharactAPP(QtWidgets.QMainWindow):
 # Stop Events
 ###############################################################################
     def StopSweep(self):
-        print 'Stop'
+        print('Stop')
         self.SetEnableObjects(val=True, Objects=self.SweepEnableObjects)
         self.Charac.SetBias(Vds=0, Vgs=0)
         self.ButSweep.setText('Start')
@@ -484,7 +474,7 @@ class CharactAPP(QtWidgets.QMainWindow):
     def ChckSaveDataChanged(self):
         if self.ChckSaveData.isChecked():
             self.FileName, _ = QFileDialog.getSaveFileName(self, 'Save File')
-            print self.FileName
+            print(self.FileName)
             if not self.FileName:
                 self.ChckSaveData.setChecked(False)
                 return
