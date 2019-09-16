@@ -37,7 +37,7 @@ def GetDevName():
         Dev = dev + '/{}'
 
     if Dev is None:
-        print 'ERRROORR dev not found ', value
+        print('ERRROORR dev not found ', value)
 
     return Dev
 
@@ -293,9 +293,9 @@ class ChannelsConfig():
         else:
             self.GateChannelIndex = None
 
-        print 'Channels configurtation'
-        print 'Gate', self.GateChannelIndex
-        print 'Channels ', len(self.ChNamesList)
+        print('Channels configurtation')
+        print('Gate', self.GateChannelIndex)
+        print('Channels ', len(self.ChNamesList))
         for ch in sorted(Channels):
             if Configuration == 'DC':
                 print(ch, ' DC -> ',
@@ -352,7 +352,7 @@ class ChannelsConfig():
         self.VgOut = WriteAnalog((ChVg,))
 
     def SetBias(self, Vds, Vgs):
-        print 'ChannelsConfig SetBias Vgs ->', Vgs, 'Vds ->', Vds
+        print('ChannelsConfig SetBias Vgs ->', Vgs, 'Vds ->', Vds)
         self.VdsOut.SetVal(Vds)
         self.VsOut.SetVal(-Vgs)
         self.BiasVd = Vds-Vgs
@@ -383,7 +383,7 @@ class ChannelsConfig():
     def _SortChannels(self, data, SortDict):
         (samps, inch) = data.shape
         sData = np.zeros((samps, len(SortDict)))
-        for chn, inds in SortDict.iteritems():
+        for chn, inds in SortDict.items():
             sData[:, inds[1]] = data[:, inds[0]]
         return sData
 
@@ -426,7 +426,7 @@ class ChannelsConfig():
                              EverySamps=EverySamps)
 
     def __del__(self):
-        print 'Delete class'
+        print('Delete class')
         if self.VgOut:
             self.VgOut.ClearTask()
         self.VdsOut.ClearTask()
@@ -636,7 +636,7 @@ class FFTBodeAnalysis():
 
         if self.RemoveDC:
 
-            for chk, chi, in sorted(ChIndexes.iteritems()):
+            for chk, chi, in sorted(ChIndexes.items()):
                 Data[:, chi[1]] = Data[:, chi[1]] - np.mean(Data[:, chi[1]])
 
         FFTconf = self.BodeSignal.FFTconfs[Ind]
@@ -645,7 +645,7 @@ class FFTBodeAnalysis():
         Gm = np.ones((len(FFTconf.Finds),
                       inch))*np.complex(np.nan)
 
-        for chk, chi, in sorted(ChIndexes.iteritems()):
+        for chk, chi, in sorted(ChIndexes.items()):
             Out = self.BodeSignal.CalcFFT(Data=x[:, chi[1]],
                                           Ind=Ind)
 
@@ -725,7 +725,7 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
         x = np.arange(0, r)
         mm, oo = np.polyfit(x, data, 1)
         Dev = np.abs(np.mean(mm))
-        print 'DataProcess Attempt ', Dev
+        print('DataProcess Attempt ', Dev)
         if self.EventBiasAttempt:
             Ids = (data-self.BiasVd)/self.IVGainDC
             if not self.EventBiasAttempt(Ids,
@@ -760,7 +760,7 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
         FFTconf = self.BodeSignal.FFTconfs[self.iConf]
 
         if SeqConf:
-            print 'InitInptuns', SeqConf
+            print('InitInptuns', SeqConf)
             self.InitInputs(**SeqConf)
 
         signal, _ = self.BodeSignal.GenSignal(Ind=self.iConf)
@@ -790,7 +790,7 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
 
             if self.SeqIndex <= len(self.InitConfig['Channels']) - 1:
                 Channel = [sorted(self.InitConfig['Channels'])[self.SeqIndex], ]
-                print 'Channel -->', Channel
+                print('Channel -->', Channel)
                 SeqConf['Channels'] = Channel
                 self.SeqIndex += 1
 
@@ -873,7 +873,7 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
         self.ACDataEveryNEvent = self.EventDataAcq
         if not self.PSDDuration:
             self.PSDDuration = self.PSDnFFT*self.PSDnAvg*(1/self.PSDFs)
-        print 'DataProcess Acquire PSD data for ', self.PSDDuration, 'seconds'
+        print('DataProcess Acquire PSD data for ', self.PSDDuration, 'seconds')
         self.ACDataDoneEvent = self.CalcPSDData
         self.ReadChannelsData(Fs=self.PSDFs,
                               nSamps=self.PSDnFFT*self.PSDnAvg,
@@ -949,7 +949,7 @@ class Charact(DataProcess):
         # Init Dictionaries
         self.InitDictionaries()
         self.DO = self.GenerateDigitalSignal()
-        print self.DO
+        print(self.DO)
         self.ColumnsControl.SetDigitalSignal(Signal=self.DO[:, self.SwDigInd])
         self.ApplyBiasPoint()
 
@@ -961,7 +961,7 @@ class Charact(DataProcess):
             Gate = True
 
         self.DevACVals = None
-        print self.ChannelNames
+        print(self.ChannelNames)
         self.DevDCVals = PyData.InitDCRecord(nVds=self.SwVdsVals,
                                              nVgs=self.SwVgsVals,
                                              ChNames=self.ChannelNames,
@@ -1018,7 +1018,7 @@ class Charact(DataProcess):
                                self.SwVgsVals[self.SwVgsInd])
 
     def ApplyNextDigital(self):
-        print 'ApplyNextDigital'
+        print('ApplyNextDigital')
         self.ColumnsControl.SetDigitalSignal(Signal=self.DO[:, self.SwDigInd])
 
     def BiasAttemptCallBack(self, Ids, time, Dev):
@@ -1034,7 +1034,7 @@ class Charact(DataProcess):
             self.StopCharac()
 
     def BiasDoneCallBack(self, Ids):
-        print 'BiasDoneCallback', Ids.shape, self.DigColumns[self.SwDigInd]
+        print('BiasDoneCallback', Ids.shape, self.DigColumns[self.SwDigInd])
         j = 0
         for chi, chn in enumerate(self.ChannelNames):
             if chn.endswith(self.DigColumns[self.SwDigInd]):
@@ -1054,7 +1054,7 @@ class Charact(DataProcess):
                 self.ApplyNextBias()
 
     def GateDoneCallBack(self, Igs):
-        for chn, inds in self.GateChannelIndex.iteritems():
+        for chn, inds in self.GateChannelIndex.items():
             self.DevDCVals['Gate']['Ig'][self.SwVgsInd, self.SwVdsInd] = Igs
 
     def BodeDoneCallBack(self, Gm, SigFreqs):
@@ -1096,7 +1096,7 @@ class Charact(DataProcess):
             self.EventFFTDone(FFT)
 
     def StopCharac(self):
-        print 'STOP'
+        print('STOP')
         self.ColumnsControl.SetDigitalSignal(Signal=self.ClearSig)
         self.CharactRunning = False
 #        self.Inputs.ClearTask()
