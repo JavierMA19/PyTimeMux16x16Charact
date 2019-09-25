@@ -7,7 +7,7 @@ Created on Tue Oct 09 11:19:55 2018
 
 import sys
 import ctypes
-import PyGFET.DataStructures as PyData
+import PyGFETdb.DataStructures as PyData
 import PyDAQmx as Daq
 from ctypes import byref, c_int32
 import numpy as np
