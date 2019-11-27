@@ -237,8 +237,9 @@ class CharactAPP(QtWidgets.QMainWindow):
         self.Charac = PyCharact.Charact(Channels=Channels,
                                         GateChannel=GateChannel,
                                         Configuration=Config)
-
+        print('Charact gui Init Digital Channels')
         self.Charac.InitDigitalChannels(DigColumns=DigColumns)
+        print('Digital init')
 
         # Define events callbacks
         self.Charac.EventCharSweepDone = self.CharSweepDoneCallBack

@@ -241,15 +241,15 @@ class ChannelsConfig():
 #                 'Col15': ('line14', ),
 #                 'Col16': ('line13', ),
 #                 }
-    doColumns = {'Col1': ('line0', 'line1'),
-                 'Col2': ('line2', 'line3'),
-                 'Col3': ('line4', 'line5'),
-                 'Col4': ('line6', 'line7'),
-                 'Col5': ('line8', 'line9'),
-                 'Col6': ('line10', 'line11'),
-                 'Col7': ('line12', 'line13'),
-                 'Col8': ('line14', 'line15'),
-                 'Col9': ('line16', 'line17'),
+    doColumns = {'Col01': ('line0', 'line1'),
+                 'Col02': ('line2', 'line3'),
+                 'Col03': ('line4', 'line5'),
+                 'Col04': ('line6', 'line7'),
+                 'Col05': ('line8', 'line9'),
+                 'Col06': ('line10', 'line11'),
+                 'Col07': ('line12', 'line13'),
+                 'Col08': ('line14', 'line15'),
+                 'Col09': ('line16', 'line17'),
                  'Col10': ('line18', 'line19'),
                  'Col11': ('line20', 'line21'),
                  'Col12': ('line22', 'line23'),
@@ -1114,6 +1114,6 @@ class Charact(DataProcess):
 
     def StopCharac(self):
         print 'STOP'
-        self.ColumnsControl.SetDigitalSignal(Signal=self.ClearSig)
+#        self.ColumnsControl.SetDigitalSignal(Signal=self.ClearSig)
         self.CharactRunning = False
 #        self.Inputs.ClearTask()
