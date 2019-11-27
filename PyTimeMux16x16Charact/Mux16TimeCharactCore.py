@@ -224,22 +224,39 @@ class ChannelsConfig():
                   'Ch16': ('ai23', 'ai31')}
 
     # Daq card digital connections mapping 'Column name':(VsControl, VdControl)
-    doColumns = {'Col01': ('line1', ),
-                 'Col02': ('line2', ),
-                 'Col03': ('line3', ),
-                 'Col04': ('line0', ),
-                 'Col05': ('line5', ),
-                 'Col06': ('line7', ),
-                 'Col07': ('line6', ),
-                 'Col08': ('line4', ),
-                 'Col09': ('line8', ),
-                 'Col10': ('line11', ),
-                 'Col11': ('line10', ),
-                 'Col12': ('line9', ),
-                 'Col13': ('line12', ),
-                 'Col14': ('line15', ),
-                 'Col15': ('line14', ),
-                 'Col16': ('line13', ),
+#    doColumns = {'Col01': ('line1', ),
+#                 'Col02': ('line2', ),
+#                 'Col03': ('line3', ),
+#                 'Col04': ('line0', ),
+#                 'Col05': ('line5', ),
+#                 'Col06': ('line7', ),
+#                 'Col07': ('line6', ),
+#                 'Col08': ('line4', ),
+#                 'Col09': ('line8', ),
+#                 'Col10': ('line11', ),
+#                 'Col11': ('line10', ),
+#                 'Col12': ('line9', ),
+#                 'Col13': ('line12', ),
+#                 'Col14': ('line15', ),
+#                 'Col15': ('line14', ),
+#                 'Col16': ('line13', ),
+#                 }
+    doColumns = {'Col1': ('line0', 'line1'),
+                 'Col2': ('line2', 'line3'),
+                 'Col3': ('line4', 'line5'),
+                 'Col4': ('line6', 'line7'),
+                 'Col5': ('line8', 'line9'),
+                 'Col6': ('line10', 'line11'),
+                 'Col7': ('line12', 'line13'),
+                 'Col8': ('line14', 'line15'),
+                 'Col9': ('line16', 'line17'),
+                 'Col10': ('line18', 'line19'),
+                 'Col11': ('line20', 'line21'),
+                 'Col12': ('line22', 'line23'),
+                 'Col13': ('line24', 'line25'),
+                 'Col14': ('line26', 'line27'),
+                 'Col15': ('line28', 'line29'),
+                 'Col16': ('line30', 'line31'),
                  }
 
 
@@ -317,14 +334,14 @@ class ChannelsConfig():
         self.Inputs.DoneEvent = self.DoneEventCallBack
 
     def InitDigitalChannels(self, DigColumns=None):
-        self.ClearSig = np.zeros((1, len(DigColumns)),
-                                 dtype=np.bool).astype(np.uint8)
+#        self.ClearSig = np.zeros((1, len(DigColumns)),
+#                                 dtype=np.bool).astype(np.uint8)
         DOChannels = []
         self.DigColumns = sorted(DigColumns)
 
         for digc in sorted(self.DigColumns):
             DOChannels.append(self.doColumns[digc][0])
-#            DOChannels.append(self.doColumns[digc][1])
+            DOChannels.append(self.doColumns[digc][1])
 
         self.ColumnsControl = WriteDigital(Channels=DOChannels)
 
@@ -373,7 +390,7 @@ class ChannelsConfig():
             Lout = np.zeros((1, len(self.DigColumns)), dtype=np.bool)
             Lout[0, nCol:  (nCol + 1)] = True
             Cout = np.vstack((Lout))
-#            Cout = np.vstack((Lout, ~Lout))
+            Cout = np.vstack((Lout, ~Lout))
             DOut = np.vstack((DOut, Cout)) if DOut.size else Cout
 
         DOut.astype(np.uint8)
