@@ -389,7 +389,7 @@ class ChannelsConfig():
         for nCol in range(len(self.DigColumns)):
             Lout = np.zeros((1, len(self.DigColumns)), dtype=np.bool)
             Lout[0, nCol:  (nCol + 1)] = True
-            Cout = np.vstack((Lout))
+#            Cout = np.vstack((Lout))
             Cout = np.vstack((Lout, ~Lout))
             DOut = np.vstack((DOut, Cout)) if DOut.size else Cout
 
