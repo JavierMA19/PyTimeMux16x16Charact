@@ -350,11 +350,14 @@ class ChannelsConfig():
         self.VsOut = WriteAnalog((ChVs,))
         self.VdsOut = WriteAnalog((ChVds,))
         self.VgOut = WriteAnalog((ChVg,))
+        self.VsigOut = WriteAnalog((ChVsig,))
 
     def SetBias(self, Vds, Vgs):
         print 'ChannelsConfig SetBias Vgs ->', Vgs, 'Vds ->', Vds
         self.VdsOut.SetVal(Vds)
         self.VsOut.SetVal(-Vgs)
+        self.VgOut.SetVal(4-Vgs)
+        self.VsigOut.SetVal(-4-Vgs)
         self.BiasVd = Vds-Vgs
         self.Vgs = Vgs
         self.Vds = Vds
