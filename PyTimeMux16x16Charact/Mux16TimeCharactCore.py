@@ -357,7 +357,7 @@ class ChannelsConfig():
         self.VdsOut.SetVal(Vds)
         self.VsOut.SetVal(-Vgs)
         self.VgOut.SetVal(4-Vgs)
-        self.VsigOut.SetVal(-4-Vgs)
+        self.VsigOut.SetVal(-2-Vgs)
         self.BiasVd = Vds-Vgs
         self.Vgs = Vgs
         self.Vds = Vds
