@@ -354,8 +354,8 @@ class ChannelsConfig():
 
     def SetBias(self, Vds, Vgs):
         print 'ChannelsConfig SetBias Vgs ->', Vgs, 'Vds ->', Vds
-        self.VdsOut.SetVal(Vds)
-        self.VsOut.SetVal(-Vgs)
+        self.VdsOut.SetVal(Vgs)
+        self.VsOut.SetVal(Vds)
         self.VgOut.SetVal(4-Vgs)
         self.VsigOut.SetVal(-2-Vgs)
         self.BiasVd = Vds-Vgs
@@ -431,7 +431,10 @@ class ChannelsConfig():
     def __del__(self):
         print 'Delete class'
         if self.VgOut:
+            self.VgOut.SetVal(0)
             self.VgOut.ClearTask()
+        if self.VsigOut:
+            self.VsigOut.SetVal(0)
         self.VdsOut.ClearTask()
         self.VsOut.ClearTask()
         self.Inputs.ClearTask()
@@ -730,14 +733,17 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
         Dev = np.abs(np.mean(mm))
         print 'DataProcess Attempt ', Dev
         if self.EventBiasAttempt:
-            Ids = (data-self.BiasVd)/self.IVGainDC
+#            Ids = (data-self.BiasVd)/self.IVGainDC
+            Ids = data/self.IVGainDC          
             if not self.EventBiasAttempt(Ids,
                                          x*(1/np.float32(self.Inputs.Fs)),
                                          Dev):
                 return  # Cancel execution
 
         if (Dev < self.DevCondition):
-            Ids = (oo-self.BiasVd)/self.IVGainDC
+#            Ids = (oo-self.BiasVd)/self.IVGainDC
+            Ids = oo/self.IVGainDC
+           
             if self.EventBiasDone:
                 self.EventBiasDone(Ids)
             return
