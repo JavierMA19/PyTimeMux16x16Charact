@@ -141,7 +141,7 @@ class WriteAnalog(Daq.Task):
         Dev = GetDevName()
         for Ch in Channels:
             self.CreateAOVoltageChan(Dev.format(Ch), "",
-                                     -5.0, 5.0, Daq.DAQmx_Val_Volts, None)
+                                     -10.0, 10.0, Daq.DAQmx_Val_Volts, None)
         self.DisableStartTrig()
         self.StopTask()
 
@@ -356,8 +356,8 @@ class ChannelsConfig():
         print 'ChannelsConfig SetBias Vgs ->', Vgs, 'Vds ->', Vds
         self.VdsOut.SetVal(Vgs)
         self.VsOut.SetVal(Vds)
-        self.VgOut.SetVal(4-Vgs)
-        self.VsigOut.SetVal(-2-Vgs)
+        self.VgOut.SetVal(Vgs)
+        self.VsigOut.SetVal(Vgs)
         self.BiasVd = Vds-Vgs
         self.Vgs = Vgs
         self.Vds = Vds
