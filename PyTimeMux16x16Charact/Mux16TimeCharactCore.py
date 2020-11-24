@@ -726,7 +726,8 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
                               EverySamps=self.DCnSamps)
 
     def CalcBiasData(self, Data):
-        data = Data
+#        data = Data
+        data = np.abs(Data)
         r, c = data.shape
         x = np.arange(0, r)
         mm, oo = np.polyfit(x, data, 1)
@@ -734,7 +735,8 @@ class DataProcess(ChannelsConfig, FFTBodeAnalysis):
         print 'DataProcess Attempt ', Dev
         if self.EventBiasAttempt:
 #            Ids = (data-self.BiasVd)/self.IVGainDC
-            Ids = data/self.IVGainDC          
+            Ids = data/self.IVGainDC     
+            
             if not self.EventBiasAttempt(Ids,
                                          x*(1/np.float32(self.Inputs.Fs)),
                                          Dev):
